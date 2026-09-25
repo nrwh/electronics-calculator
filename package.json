@@ -1,0 +1,39 @@
+{
+  "name": "electronics-calculator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electronics design calculators with schematics, E-series snapping, graphs, derivations and SPICE netlists.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "spice-check": "tsx scripts/spice-check.ts",
+    "new-calc": "tsx scripts/new-calc.ts",
+    "size-check": "tsx scripts/size-check.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/markdown-it": "^14.2.0",
+    "@types/node": "^26.6.2",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "katex": "^0.18.9",
+    "markdown-it": "^15.0.2",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}

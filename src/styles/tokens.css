@@ -1,0 +1,107 @@
+/* Design tokens. Neutral greys, one accent, and status colours only for ok / warn / fail. */
+
+:root {
+  color-scheme: light;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, 'Liberation Mono', monospace;
+
+  /* Modular scale 1.25 on a 16px base. */
+  --fs-0: 0.8rem;
+  --fs-1: 1rem;
+  --fs-2: 1.25rem;
+  --fs-3: 1.563rem;
+  --fs-4: 1.953rem;
+
+  /* 8px spacing scale. */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2rem;
+  --sp-6: 3rem;
+
+  --radius: 6px;
+  --maxw: 72rem;
+  --gutter: 16px;
+  --t: 100ms;
+
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --surface-2: #eceef2;
+  --border: #d5d9e0;
+  --text: #1b1f24;
+  --muted: #59616d;
+  --accent: #1f5fbf;
+  --accent-text: #ffffff;
+  --accent-soft: #e6eefb;
+  --focus: #1f5fbf;
+
+  --ok: #1d7a3e;
+  --ok-soft: #e5f4ea;
+  --warn: #8a5a00;
+  --warn-soft: #fdf3dc;
+  --fail: #b3261e;
+  --fail-soft: #fbe9e7;
+
+  /* Plot palette (four series). */
+  --plot-1: #1f5fbf;
+  --plot-2: #c2410c;
+  --plot-3: #15803d;
+  --plot-4: #6b7280;
+  --grid: #e3e6eb;
+  --grid-minor: #f0f2f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #14171b;
+    --surface: #1c2026;
+    --surface-2: #252a31;
+    --border: #3a414b;
+    --text: #e7eaee;
+    --muted: #a3abb6;
+    --accent: #7eb0ff;
+    --accent-text: #0e1726;
+    --accent-soft: #1d2a40;
+    --focus: #7eb0ff;
+    --ok: #6fd08f;
+    --ok-soft: #173123;
+    --warn: #f0c060;
+    --warn-soft: #3a2e14;
+    --fail: #ff8a80;
+    --fail-soft: #3d1c1a;
+    --plot-1: #7eb0ff;
+    --plot-2: #ff9a5c;
+    --plot-3: #6fd08f;
+    --plot-4: #a3abb6;
+    --grid: #2c323a;
+    --grid-minor: #22272e;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #14171b;
+  --surface: #1c2026;
+  --surface-2: #252a31;
+  --border: #3a414b;
+  --text: #e7eaee;
+  --muted: #a3abb6;
+  --accent: #7eb0ff;
+  --accent-text: #0e1726;
+  --accent-soft: #1d2a40;
+  --focus: #7eb0ff;
+  --ok: #6fd08f;
+  --ok-soft: #173123;
+  --warn: #f0c060;
+  --warn-soft: #3a2e14;
+  --fail: #ff8a80;
+  --fail-soft: #3d1c1a;
+  --plot-1: #7eb0ff;
+  --plot-2: #ff9a5c;
+  --plot-3: #6fd08f;
+  --plot-4: #a3abb6;
+  --grid: #2c323a;
+  --grid-minor: #22272e;
+}

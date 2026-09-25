@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}}</title>
+    <meta name="description" content="{{description}}" />
+    <link rel="canonical" href="{{url}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Electronics Calculator" />
+    <meta property="og:title" content="{{ogTitle}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:url" content="{{url}}" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      document.documentElement.classList.add('js');
+      try {
+        var t = localStorage.getItem('ec-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <script type="module" src="{{script}}"></script>
+  </head>
+  <body class="{{bodyClass}}">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="{{base}}">Electronics Calculator</a>
+      <nav aria-label="Site">
+        <a href="{{base}}" {{navHome}}>Calculators</a>
+        <a href="{{base}}about/" {{navAbout}}>About</a>
+      </nav>
+      <label class="theme needs-js">
+        <span class="visually-hidden">Theme</span>
+        <select id="theme">
+          <option value="auto">Auto theme</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </header>
+    <main id="main">{{main}}</main>
+    <footer class="site-footer">
+      <p>
+        Results are estimates for design work; check datasheets and test your circuit.
+        <a href="{{base}}about/">About, assumptions and licence</a> ·
+        <a href="{{repo}}">Source on GitHub</a>
+      </p>
+    </footer>
+  </body>
+</html>
