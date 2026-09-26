@@ -1,4 +1,5 @@
-// Home page: filter box and category chips over the pre-rendered cards. State in ?q=…&cat=…
+// Home page: filter box and category list (with match counts) beside the pre-rendered cards.
+// State in ?q=…&cat=…
 
 import { rank, type FilterEntry } from '../lib/filter';
 import { initShell } from '../ui/shell';
@@ -8,7 +9,7 @@ initShell();
 const list = document.getElementById('cards') as HTMLUListElement;
 const cards = Array.from(list.querySelectorAll<HTMLLIElement>('li.card'));
 const input = document.getElementById('q') as HTMLInputElement;
-const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('.chip'));
+const cats = Array.from(document.querySelectorAll<HTMLButtonElement>('.cat-list button'));
 const status = document.getElementById('filter-status') as HTMLElement;
 
 const entries: FilterEntry[] = cards.map((c) => ({
@@ -22,15 +23,24 @@ const entries: FilterEntry[] = cards.map((c) => ({
 const params = new URLSearchParams(location.search);
 input.value = params.get('q') ?? '';
 let category = params.get('cat') ?? '';
-if (!chips.some((c) => c.dataset.cat === category)) category = '';
+if (!cats.some((c) => c.dataset.cat === category)) category = '';
 
 function apply(): void {
+  // Counts follow the search text; the category only narrows the cards shown.
+  const matches = rank(entries, input.value);
+  for (const btn of cats) {
+    const cat = btn.dataset.cat ?? '';
+    const n = cat ? matches.filter((i) => entries[i]!.category === cat).length : matches.length;
+    btn.querySelector('.cat-count')!.textContent = String(n);
+    btn.classList.toggle('empty', n === 0);
+    btn.setAttribute('aria-pressed', String(cat === category));
+  }
+
   const order = rank(entries, input.value, category);
   const shown = new Set(order);
   cards.forEach((c, i) => (c.hidden = !shown.has(i)));
   for (const i of order) list.appendChild(cards[i]!);
   for (const [i, c] of cards.entries()) if (!shown.has(i)) list.appendChild(c);
-  for (const chip of chips) chip.setAttribute('aria-pressed', String(chip.dataset.cat === category));
   const filtered = input.value.trim() !== '' || category !== '';
   status.textContent = !filtered
     ? ''
@@ -46,9 +56,9 @@ function apply(): void {
 }
 
 input.addEventListener('input', apply);
-for (const chip of chips) {
-  chip.addEventListener('click', () => {
-    category = chip.dataset.cat ?? '';
+for (const btn of cats) {
+  btn.addEventListener('click', () => {
+    category = btn.dataset.cat ?? '';
     apply();
   });
 }

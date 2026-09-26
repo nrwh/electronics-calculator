@@ -57,15 +57,34 @@ function page(
   });
 }
 
-export function renderHome(ctx: SiteContext, metas: CalculatorMeta[]): string {
-  const cats = Object.entries(CATEGORY_LABELS) as [Category, string][];
+/**
+ * A schematic as a decorative card thumbnail: the card's heading names it, and dropping the
+ * title/desc ids keeps them unique when several schematics share a page.
+ */
+export function thumbSvg(svg: string): string {
+  return svg
+    .replace(/<title id="sch-title">[\s\S]*?<\/title>/, '')
+    .replace(/<desc id="sch-desc">[\s\S]*?<\/desc>/, '')
+    .replace(/ role="img" aria-labelledby="sch-title sch-desc"/, ' aria-hidden="true" focusable="false"');
+}
+
+export function renderHome(
+  ctx: SiteContext,
+  metas: CalculatorMeta[],
+  schematics: Record<string, string>,
+): string {
+  const cats = (Object.entries(CATEGORY_LABELS) as [Category, string][]).filter(([k]) =>
+    metas.some((m) => m.category === k),
+  );
+  const catButton = (key: string, label: string, count: number): string =>
+    `<li><button type="button" data-cat="${key}" aria-pressed="${key === ''}"><span class="cat-name">${esc(label)}</span><span class="cat-count">${count}</span></button></li>`;
   const cards = metas
     .map(
       (m) => `
       <li class="card" data-id="${esc(m.id)}" data-title="${esc(m.title)}" data-category="${m.category}" data-keywords="${esc(m.keywords.join('|'))}" data-summary="${esc(m.summary)}">
         <a href="${ctx.base}calc/${m.id}/">
+          <div class="card-thumb">${thumbSvg(schematics[m.id] ?? '')}</div>
           <h2>${esc(m.title)}</h2>
-          <p>${esc(m.summary)}</p>
           <span class="card-cat">${esc(CATEGORY_LABELS[m.category])}</span>
         </a>
       </li>`,
@@ -75,16 +94,22 @@ export function renderHome(ctx: SiteContext, metas: CalculatorMeta[]): string {
     <section class="home">
       <h1>Electronics design calculators</h1>
       <p class="lede">Each calculator gives you a schematic, standard (E-series) part values, a component guide, graphs, the derivation of its formulas and a SPICE netlist.</p>
-      <div class="filter needs-js" role="search">
-        <label for="q">Filter calculators</label>
-        <input id="q" type="search" placeholder="e.g. filter, buck, wien, counter" autocomplete="off" spellcheck="false" />
+      <div class="home-layout">
+        <nav class="cat-list needs-js" aria-label="Category">
+          <ul>
+            ${catButton('', 'All', metas.length)}
+            ${cats.map(([k, label]) => catButton(k, label, metas.filter((m) => m.category === k).length)).join('')}
+          </ul>
+        </nav>
+        <div class="home-results">
+          <div class="filter needs-js" role="search">
+            <label for="q">Filter calculators</label>
+            <input id="q" type="search" placeholder="e.g. filter, buck, wien, counter" autocomplete="off" spellcheck="false" />
+          </div>
+          <p class="filter-status" id="filter-status" role="status"></p>
+          <ul class="cards" id="cards">${cards}</ul>
+        </div>
       </div>
-      <div class="chips needs-js" role="group" aria-label="Category">
-        <button type="button" class="chip" data-cat="" aria-pressed="true">All</button>
-        ${cats.map(([k, label]) => `<button type="button" class="chip" data-cat="${k}" aria-pressed="false">${esc(label)}</button>`).join('')}
-      </div>
-      <p class="filter-status" id="filter-status" role="status"></p>
-      <ul class="cards" id="cards">${cards}</ul>
     </section>`;
   return page(ctx, {
     title: `${SITE_NAME}: design calculators with schematics and SPICE`,
@@ -127,18 +152,16 @@ export function renderCalculator(
   const main = `
     <article class="calc" data-calc="${esc(meta.id)}">
       <div class="calc-head">
-        <div class="calc-title">
-          <h1>${esc(meta.title)}</h1>
-          <p class="summary">${esc(meta.summary)}</p>
-        </div>
-        <div class="settings-bar needs-js" id="settings" role="group" aria-label="Component series and tolerance">${top.settings}</div>
+        <h1>${esc(meta.title)}</h1>
+        <p class="summary">${esc(meta.summary)}</p>
       </div>
       <noscript><p class="noscript">The calculator needs JavaScript. The derivation below works without it.</p></noscript>
       <section class="top-panel needs-js" id="top-panel" aria-label="Design">
         <div class="top-left" id="top-left">
           <div id="solve">${top.solve}</div>
           <div id="fields" class="fields">${top.fields}</div>
-          <div id="headline" class="headline" aria-live="polite">${top.headline}</div>
+          <div class="series-box" id="settings" role="group" aria-labelledby="series-title"${top.settings ? '' : ' hidden'}>${top.settings}</div>
+          <div id="headline" class="visually-hidden" aria-live="polite">${top.headline}</div>
           <div id="messages" class="messages">${top.messages}</div>
         </div>
         <figure class="top-right" id="schematic">${top.schematic}</figure>
@@ -160,14 +183,11 @@ export function renderCalculator(
   });
 }
 
-export function renderAbout(ctx: SiteContext, metas: CalculatorMeta[]): string {
+export function renderAbout(ctx: SiteContext): string {
   const main = `
     <article class="prose about">
       <h1>About</h1>
       <p>${SITE_NAME} is a set of electronics design calculators. Each one works out component values, snaps them to standard E-series values, shows what the chosen parts actually achieve (including the spread across part tolerances), and gives a schematic, graphs, a component selection guide, the derivation of every formula and a SPICE netlist you can simulate.</p>
-
-      <h2>Calculators</h2>
-      <ul>${metas.map((m) => `<li><a href="${ctx.base}calc/${m.id}/">${esc(m.title)}</a>: ${esc(m.summary)}</li>`).join('')}</ul>
 
       <h2>Assumptions</h2>
       <ul>

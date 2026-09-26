@@ -13,7 +13,12 @@ export interface FieldHandle {
   setText(text: string): void;
 }
 
-export function bindField(el: HTMLElement, onInput: (key: string, raw: string) => void): FieldHandle {
+export function bindField(
+  el: HTMLElement,
+  onInput: (key: string, raw: string) => void,
+  /** Called when a text input's value is committed: on leaving the field or pressing Enter. */
+  onCommit?: (key: string) => void,
+): FieldHandle {
   const key = el.dataset.key!;
   const input = el.querySelector<HTMLInputElement | HTMLSelectElement>('input, select')!;
   const mark = el.querySelector<HTMLElement>('.solved-mark')!;
@@ -21,6 +26,12 @@ export function bindField(el: HTMLElement, onInput: (key: string, raw: string) =
   input.addEventListener(input instanceof HTMLSelectElement ? 'change' : 'input', () =>
     onInput(key, input.value),
   );
+  if (input instanceof HTMLInputElement && onCommit) {
+    input.addEventListener('change', () => onCommit(key));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') onCommit(key);
+    });
+  }
 
   const setText = (text: string): void => {
     if (input.value !== text) input.value = text;

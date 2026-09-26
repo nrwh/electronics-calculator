@@ -4,7 +4,7 @@
 
 import type { AnyCalculatorDef, PartType, ResultRow, Settings, VarDef } from '../calculators/types';
 import { SERIES_NAMES } from '../lib/eseries';
-import { findOption, unitOf, type PipelineResult } from '../lib/pipeline';
+import { findOption, snapPart, unitOf, type PipelineResult } from '../lib/pipeline';
 import { formatNum, formatPercent, formatSI, siParts } from '../lib/units';
 
 export function esc(s: string): string {
@@ -165,8 +165,12 @@ export function fieldView(
   if (!r) return view;
   const err = r.fieldErrors[key];
   if (err) return { ...view, message: err, error: true };
-  if (d.kind === 'part' && r.offSeries.includes(key))
+  if (d.kind === 'part' && r.offSeries.includes(key)) {
+    const snap = snapPart(d, view.text, settings);
+    if (snap !== null)
+      return { ...view, message: `snaps to ${formatValue(snap, unit)} (${settings.series[d.part]})` };
     return { ...view, message: `not in ${settings.series[d.part]}` };
+  }
   if (r.ok) {
     const cmp = r.compare.find((c) => c.key === key);
     if (cmp) view.message = `achieved ${formatValue(cmp.achieved, unit)} (${formatPercent(cmp.err)})`;
@@ -204,7 +208,8 @@ export const TOLERANCES = [0.1, 0.25, 0.5, 1, 2, 5, 10, 20] as const;
 export const PART_NAMES: Record<PartType, string> = { R: 'Resistors', C: 'Capacitors', L: 'Inductors' };
 
 export function settingsBarHtml(types: PartType[], settings: Settings): string {
-  return types
+  if (!types.length) return '';
+  const bar = types
     .map((t) => {
       const series = [...SERIES_NAMES, 'none']
         .map(
@@ -219,12 +224,13 @@ export function settingsBarHtml(types: PartType[], settings: Settings): string {
         .map((v) => `<option value="${v}"${settings.tol[t] === v ? ' selected' : ''}>±${v} %</option>`)
         .join('');
       return (
-        `<div class="setting"><span class="setting-name">${t}</span>` +
+        `<div class="setting"><span class="setting-name">${PART_NAMES[t]}</span>` +
         `<select id="set-e${t}" aria-label="${PART_NAMES[t]} series">${series}</select>` +
         `<select id="set-t${t}" aria-label="${PART_NAMES[t]} tolerance">${tol}</select></div>`
       );
     })
     .join('');
+  return `<span class="series-title" id="series-title">Component series</span><div class="settings-bar">${bar}</div>`;
 }
 
 export interface TopPanel {

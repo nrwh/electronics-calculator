@@ -76,12 +76,25 @@ export function setTheme(t: Theme): void {
   }
 }
 
-/** Wire up the theme select in the site header. */
+/**
+ * Wire up the theme switch in the site header. Until the viewer flips it, the switch follows the
+ * system preference; flipping it stores an explicit light or dark choice.
+ */
 export function initThemeControl(): void {
-  const sel = document.getElementById('theme') as HTMLSelectElement | null;
-  if (!sel) return;
-  sel.value = getTheme();
-  sel.addEventListener('change', () => setTheme(sel.value as Theme));
+  const btn = document.getElementById('theme') as HTMLButtonElement | null;
+  if (!btn) return;
+  const system = window.matchMedia('(prefers-color-scheme: dark)');
+  const isDark = (): boolean => {
+    const t = getTheme();
+    return t === 'auto' ? system.matches : t === 'dark';
+  };
+  const show = (): void => btn.setAttribute('aria-checked', String(isDark()));
+  btn.addEventListener('click', () => {
+    setTheme(isDark() ? 'light' : 'dark');
+    show();
+  });
+  system.addEventListener('change', show);
+  show();
 }
 
 /**

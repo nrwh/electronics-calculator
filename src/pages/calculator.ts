@@ -1,10 +1,10 @@
 // Calculator page: reads the id from the pre-rendered page, lazily loads that calculator's chunk,
-// and drives the top panel (solve-for, fields, headline results, schematic) and the tabs.
+// and drives the top panel (solve-for, fields, series, schematic), the sticky strip and the tabs.
 
 import 'katex/dist/katex.min.css';
 import { loadCalculator } from '../calculators/registry';
 import type { AnyCalculatorDef, ResultRow, Settings } from '../calculators/types';
-import { findOption, runPipeline, unitOf, type PipelineResult } from '../lib/pipeline';
+import { findOption, runPipeline, snapPartText, unitOf, type PipelineResult } from '../lib/pipeline';
 import { formatInput } from '../lib/units';
 import { partTypes, readState, writeState, type CalcState, type TabId } from '../lib/url';
 import { bindField, type FieldHandle } from '../ui/field';
@@ -60,7 +60,11 @@ class CalculatorPage {
     this.fieldsBox.innerHTML = html.fields;
     this.setSolve = bindSolveControl(this.solveBox, (id) => this.switchSolve(id)).set;
     for (const el of this.fieldsBox.querySelectorAll<HTMLElement>('.field')) {
-      const f = bindField(el, (k, raw) => this.onInput(k, raw));
+      const f = bindField(
+        el,
+        (k, raw) => this.onInput(k, raw),
+        (k) => this.onCommit(k),
+      );
       this.fields.set(f.key, f);
     }
     renderSettingsBar($('#settings'), partTypes(def), st.settings, (s) => this.onSettings(s));
@@ -96,10 +100,32 @@ class CalculatorPage {
     this.timer = window.setTimeout(() => this.compute(), DEBOUNCE_MS);
   }
 
+  /** A typed part snaps to the selected series once the viewer leaves the field. */
+  private onCommit(key: string): void {
+    if (this.snapInput(key)) {
+      clearTimeout(this.timer);
+      this.compute();
+    }
+  }
+
   private onSettings(s: Settings): void {
     this.state.settings = s;
     savePrefs(s);
+    // Keep typed parts on the (new) series.
+    for (const key of this.fields.keys()) this.snapInput(key);
+    clearTimeout(this.timer);
     this.compute();
+  }
+
+  /** Replace a typed part's text with its nearest series value. True when the text changed. */
+  private snapInput(key: string): boolean {
+    if (findOption(this.def, this.state.solve).targets.includes(key)) return false;
+    const d = this.def.vars[key]!;
+    const text = snapPartText(d, this.state.raw[key] ?? d.default, this.state.settings);
+    if (text === null) return false;
+    this.state.raw[key] = text;
+    this.fields.get(key)?.setText(text);
+    return true;
   }
 
   private onTab(id: TabId): void {
@@ -181,21 +207,17 @@ class CalculatorPage {
     this.stale.delete(id);
   }
 
-  // ---------- Sticky strip (narrow screens) ----------
+  // ---------- Sticky strip ----------
 
   private stripVisible = false;
 
-  /**
-   * On narrow screens the top panel (inputs, then schematic) is taller than the viewport, so the
-   * strip appears once the headline results have scrolled above the top of the screen.
-   */
+  /** The strip appears once the top panel has scrolled above the top of the screen. */
   private observeTopPanel(): void {
-    const wide = window.matchMedia('(min-width: 900px) and (min-height: 700px)');
     const io = new IntersectionObserver(([entry]) => {
-      this.stripVisible = !entry!.isIntersecting && entry!.boundingClientRect.bottom < 0 && !wide.matches;
+      this.stripVisible = !entry!.isIntersecting && entry!.boundingClientRect.bottom < 0;
       this.strip.hidden = !this.stripVisible;
     });
-    io.observe(this.headline);
+    io.observe($('#top-panel'));
   }
 
   private renderStrip(): void {

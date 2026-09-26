@@ -84,14 +84,14 @@ If `analyse` picks parts that aren't variables (the buck's feedback divider, the
 
 ### 5. Output
 
-- `results()` returns rows. Mark two or three with `headline: true` for the top panel. Give a row `achieved: 'fc'` to show its target, error and spread.
+- `results()` returns rows. Mark two or three with `headline: true` for the summary strip that stays in view while the page scrolls (and is announced to screen readers). Give a row `achieved: 'fc'` to show its target, error and spread.
 - `schematic()` returns `new Sheet(...)…render()`, drawn from `schematic/symbols.ts` with `place(symbol, x, y, { rot, ref, value })` and `wire(...points)`. Coordinates are on a 10-unit grid. Add IEC symbols to `symbols.ts` as needed.
 - `plots()` (optional) returns Bode, waveform or timing specs; the page draws them as SVG with a data-table fallback.
 - `guide()` returns component selection advice with `ok` / `warn` / `fail` / `info` status.
 - `spice()` returns a `Netlist`, or `unavailable(reason)`. Use only the subset that ngspice and LTspice both accept (see the About page). Use `spiceValue()` for numbers, which always writes `Meg` for 10⁶. The op-amp subcircuit is shared in `lib/opamp.ts`.
 
 The default design (every variable at its `default`, first solve option) is rendered into the
-page at build time: the fields, headline results and schematic. That avoids layout shift when
+page at build time: the fields, series settings and schematic. That avoids layout shift when
 the script loads. So `solve`, `analyse`, `results` and `schematic` must not touch the DOM or
 browser globals; they run in Node during the build.
 

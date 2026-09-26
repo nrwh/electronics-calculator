@@ -26,19 +26,41 @@
   <body class="{{bodyClass}}">
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
-      <a class="brand" href="{{base}}">Electronics Calculator</a>
-      <nav aria-label="Site">
-        <a href="{{base}}" {{navHome}}>Calculators</a>
-        <a href="{{base}}about/" {{navAbout}}>About</a>
-      </nav>
-      <label class="theme needs-js">
-        <span class="visually-hidden">Theme</span>
-        <select id="theme">
-          <option value="auto">Auto theme</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
+      <div class="site-header-inner">
+        <a class="brand" href="{{base}}">
+          <svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <rect width="32" height="32" rx="6" fill="#1f5fbf" />
+            <path d="M4 16h6" stroke="#fff" stroke-width="2.5" />
+            <rect x="10" y="12" width="12" height="8" fill="none" stroke="#fff" stroke-width="2.5" />
+            <path d="M22 16h6" stroke="#fff" stroke-width="2.5" />
+          </svg>
+          <span>Electronics Calculator</span>
+        </a>
+        <nav aria-label="Site">
+          <a href="{{base}}" {{navHome}}>Calculators</a>
+          <a href="{{base}}about/" {{navAbout}}>About</a>
+        </nav>
+        <button
+          type="button"
+          id="theme"
+          class="theme-switch needs-js"
+          role="switch"
+          aria-checked="false"
+          aria-label="Dark theme"
+        >
+          <span class="theme-knob">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4.5" />
+              <path
+                d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"
+              />
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z" />
+            </svg>
+          </span>
+        </button>
+      </div>
     </header>
     <main id="main">{{main}}</main>
     <footer class="site-footer">

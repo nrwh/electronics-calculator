@@ -106,18 +106,29 @@ html:not(.js) .needs-js {
 }
 
 .site-header {
+  border-bottom: 1px solid var(--border);
+}
+.site-header-inner {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+  max-width: var(--maxw);
+  margin: 0 auto;
   padding: var(--sp-2) var(--gutter);
-  border-bottom: 1px solid var(--border);
-  max-width: none;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
   margin-right: auto;
+}
+.brand .logo {
+  width: 24px;
+  height: 24px;
+  flex: none;
 }
 .site-header nav {
   display: flex;
@@ -132,8 +143,70 @@ html:not(.js) .needs-js {
   color: var(--text);
   text-decoration: underline;
 }
-.theme select {
-  font-size: var(--fs-0);
+/* Theme switch: sun in the knob when light, moon when dark. */
+.theme-switch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition:
+    background var(--t),
+    border-color var(--t);
+}
+.theme-switch:hover {
+  border-color: var(--muted);
+}
+.theme-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 150ms ease;
+}
+.theme-knob svg {
+  width: 12px;
+  height: 12px;
+}
+.icon-sun {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.icon-moon {
+  fill: currentColor;
+  display: none;
+}
+.theme-switch[aria-checked='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.theme-switch[aria-checked='true'] .theme-knob {
+  transform: translateX(20px);
+}
+.theme-switch[aria-checked='true'] .icon-sun {
+  display: none;
+}
+.theme-switch[aria-checked='true'] .icon-moon {
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-knob {
+    transition: none;
+  }
 }
 
 main {

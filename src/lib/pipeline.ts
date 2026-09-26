@@ -12,7 +12,7 @@ import type {
 import { PART_UNITS } from '../calculators/types';
 import { inSeries, nearest } from './eseries';
 import { corners } from './tolerance';
-import { formatSI, parseSI } from './units';
+import { formatInput, formatSI, parseSI } from './units';
 
 export type RawInputs = Record<string, string>;
 type Values = Record<string, number | string>;
@@ -85,6 +85,26 @@ export function parseVar(d: VarDef, raw: string | undefined): { value: number | 
   if (d.min !== undefined && v < d.min) return { error: `Must be at least ${formatSI(d.min, unit)}` };
   if (d.max !== undefined && v > d.max) return { error: `Must be at most ${formatSI(d.max, unit)}` };
   return { value: v };
+}
+
+/**
+ * The nearest series value for a typed part, e.g. "1.4k" in E12 → 1500. Null when the variable is
+ * not a part, no series is selected, the text doesn't parse, or the value is already in the series.
+ */
+export function snapPart(d: VarDef, raw: string, s: Settings): number | null {
+  if (d.kind !== 'part') return null;
+  const series = s.series[d.part];
+  if (series === 'none') return null;
+  const p = parseVar(d, raw);
+  if ('error' in p || typeof p.value !== 'number') return null;
+  if (inSeries(p.value, series, 1e-4)) return null;
+  return nearest(p.value, series);
+}
+
+/** Input text for snapPart's value ("1.4k" → "1.5k"), or null when the text is left alone. */
+export function snapPartText(d: VarDef, raw: string, s: Settings): string | null {
+  const v = snapPart(d, raw, s);
+  return v === null ? null : formatInput(v);
 }
 
 export function findOption(def: AnyCalculatorDef, id: string | null | undefined): AnySolveOption {

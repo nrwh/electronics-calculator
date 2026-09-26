@@ -97,10 +97,14 @@ export function pagesPlugin(opts: { siteUrl: string }): Plugin {
 
   async function render(key: PageKey): Promise<string> {
     switch (key.kind) {
-      case 'home':
-        return renderHome(ctx(), await loadMetas(root));
+      case 'home': {
+        const metas = await loadMetas(root);
+        const tops = await Promise.all(metas.map((m) => prerenderCalculator(root, m.id)));
+        const schematics = Object.fromEntries(metas.map((m, i) => [m.id, tops[i]!.schematic]));
+        return renderHome(ctx(), metas, schematics);
+      }
       case 'about':
-        return renderAbout(ctx(), await loadMetas(root));
+        return renderAbout(ctx());
       case 'notFound':
         return renderNotFound(ctx());
       case 'calc': {
