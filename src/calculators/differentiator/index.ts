@@ -7,8 +7,8 @@ import { DEFAULT_A0, OPAMP_SUBCKT, type OpAmp, openLoop, opampSubckt } from '../
 import { bisect } from '../../lib/solve';
 import { Netlist, sine, spiceValue } from '../../lib/spice';
 import { formatSI, formatSlew } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import { capacitor, ground, opamp, resistor, terminal, vac } from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
+import sheet from './schematic.kicad_sch';
 import { type GuideItem, type ValuesOf, type Warning, defineCalculator, fail, ok, part, qty } from '../types';
 
 const vars = {
@@ -302,35 +302,18 @@ export default defineCalculator<typeof vars, Out>({
       group: 'At the input frequency',
     },
   ],
-  schematic: (v) => {
-    const s = new Sheet(
-      30,
-      17,
-      'Differentiator schematic',
-      `The input passes through C (${formatSI(v.C, 'F')}) and R1 (${formatSI(v.R1, 'Ω')}) to the inverting input. Rf (${formatSI(v.Rf, 'Ω')}) and Cf (${formatSI(v.Cf, 'F')}) are in parallel from the inverting input to the output. The non-inverting input is grounded.`,
-    );
-    const src = s.place(vac, 2, 10, { ref: 'V1', value: 'V_in' });
-    const cin = s.place(capacitor, 4, 10, { ref: 'C1', value: formatSI(v.C, 'F') });
-    const r1 = s.place(resistor, 8, 10, { ref: 'R1', value: formatSI(v.R1, 'Ω') });
-    const u = s.place(opamp, 16, 11, { ref: 'U1', value: `GBW ${formatSI(v.gbw, 'Hz')}` });
-    const cf = s.place(capacitor, 17, 3, { ref: 'C_f', value: formatSI(v.Cf, 'F'), inline: true });
-    const rf = s.place(resistor, 17, 6, { ref: 'R_f', value: formatSI(v.Rf, 'Ω'), inline: true });
-    s.wire(src.pin('p'), cin.pin('a'));
-    s.wire(cin.pin('b'), r1.pin('a'));
-    s.wire(r1.pin('b'), u.pin('in1'));
-    s.wire([14, 10], [14, 3], cf.pin('a'));
-    s.wire([14, 6], rf.pin('a'));
-    s.wire(cf.pin('b'), [24, 3], [24, 11]);
-    s.wire(rf.pin('b'), [24, 6]);
-    s.wire(u.pin('out'), [27, 11]);
-    s.dot([14, 10]).dot([14, 6]).dot([24, 6]).dot([24, 11]);
-    s.place(terminal, 27, 11, { ref: 'V_out', side: 'above' });
-    s.wire(u.pin('in2'), [16, 14]);
-    s.place(ground, 16, 14);
-    s.wire(src.pin('n'), [2, 14]);
-    s.place(ground, 2, 14);
-    return s.render();
-  },
+  schematic: (v) =>
+    kicad(sheet, {
+      title: 'Differentiator schematic',
+      desc: `The input passes through C (${formatSI(v.C, 'F')}) and R1 (${formatSI(v.R1, 'Ω')}) to the inverting input. Rf (${formatSI(v.Rf, 'Ω')}) and Cf (${formatSI(v.Cf, 'F')}) are in parallel from the inverting input to the output. The non-inverting input is grounded.`,
+      vars: {
+        C: formatSI(v.C, 'F'),
+        R1: formatSI(v.R1, 'Ω'),
+        GBW: formatSI(v.gbw, 'Hz'),
+        CF: formatSI(v.Cf, 'F'),
+        RF: formatSI(v.Rf, 'Ω'),
+      },
+    }),
   plots: (v, o) => {
     const p: Parts = v;
     const op = opOf(v);

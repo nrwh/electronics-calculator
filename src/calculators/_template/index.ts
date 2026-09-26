@@ -3,9 +3,10 @@
 
 import { Netlist } from '../../lib/spice';
 import { formatSI } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import { ground, resistor, terminal, vdc } from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
 import { defineCalculator, fail, ok, part, qty } from '../types';
+// Drawn in KiCad: open schematic.kicad_sch in KiCad's Schematic Editor. See CONTRIBUTING.md.
+import sheet from './schematic.kicad_sch';
 
 // 1. Declare every quantity once. `part` variables are snapped to the E-series when solved for.
 const vars = {
@@ -47,24 +48,13 @@ export default defineCalculator<typeof vars, Out>({
     { label: 'Divider current', value: o.current, unit: 'A', headline: true },
     { label: 'Ratio', symbol: 'V_out/V_in', value: o.ratio, unit: 'V/V' },
   ],
-  schematic: (v) => {
-    const s = new Sheet(
-      22,
-      13,
-      'Voltage divider schematic',
-      `R1 ${formatSI(v.R1, 'Ω')} from the input to the output, R2 ${formatSI(v.R2, 'Ω')} from the output to ground.`,
-    );
-    const src = s.place(vdc, 3, 2, { ref: 'V1', value: formatSI(v.Vin, 'V') });
-    const r1 = s.place(resistor, 12, 2, { rot: 90, ref: 'R1', value: formatSI(v.R1, 'Ω') });
-    const r2 = s.place(resistor, 12, 7, { rot: 90, ref: 'R2', value: formatSI(v.R2, 'Ω') });
-    s.place(terminal, 18, 6, { ref: 'V_out' });
-    s.wire(src.pin('p'), [3, 2], r1.pin('a'));
-    s.wire(r1.pin('b'), r2.pin('a'));
-    s.wire([12, 6], [18, 6]).dot([12, 6]);
-    s.wire(src.pin('n'), [3, 11], [12, 11], r2.pin('b'));
-    s.place(ground, 8, 11);
-    return s.render();
-  },
+  // 6. The schematic: each ${NAME} in the KiCad file gets its text here.
+  schematic: (v) =>
+    kicad(sheet, {
+      title: 'Voltage divider schematic',
+      desc: `R1 ${formatSI(v.R1, 'Ω')} from the input to the output, R2 ${formatSI(v.R2, 'Ω')} from the output to ground.`,
+      vars: { VIN: formatSI(v.Vin, 'V'), R1: formatSI(v.R1, 'Ω'), R2: formatSI(v.R2, 'Ω') },
+    }),
   guide: (v) => [
     {
       status: v.R1 + v.R2 > 1e6 ? 'warn' : 'ok',

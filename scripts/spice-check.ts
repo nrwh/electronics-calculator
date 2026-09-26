@@ -8,7 +8,9 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { runnerImport } from 'vite';
+import { kicadPlugin } from '../build/kicad-plugin';
 import type { AnyCalculatorDef, Settings, SpiceCase, SpiceDesign } from '../src/calculators/types';
 import { runPipeline } from '../src/lib/pipeline';
 import { isUnavailable } from '../src/lib/spice';
@@ -63,10 +65,13 @@ async function main(): Promise<void> {
   const rows: Row[] = [];
   const problems: string[] = [];
   for (const id of ids) {
-    const def = (await import(pathToFileURL(path.join(calcDir, id, 'index.ts')).href))
-      .default as AnyCalculatorDef;
-    const cases = (await import(pathToFileURL(path.join(calcDir, id, 'spice-checks.ts')).href))
-      .default as SpiceCase[];
+    // Loaded through Vite so that imports such as *.kicad_sch schematics resolve.
+    const opts = { configFile: false as const, root, logLevel: 'silent' as const, plugins: [kicadPlugin()] };
+    const def = (await runnerImport<{ default: AnyCalculatorDef }>(path.join(calcDir, id, 'index.ts'), opts))
+      .module.default;
+    const cases = (
+      await runnerImport<{ default: SpiceCase[] }>(path.join(calcDir, id, 'spice-checks.ts'), opts)
+    ).module.default;
     for (const c of cases) {
       const raw = Object.fromEntries(Object.entries(def.vars).map(([k, d]) => [k, c.raw?.[k] ?? d.default]));
       const settings: Settings = { ...structuredClone(DEFAULT_SETTINGS), ...c.settings };

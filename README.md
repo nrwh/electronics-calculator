@@ -17,7 +17,8 @@ a synchronous down counter.
 
 ## Development
 
-Requires Node.js 22.12 or later.
+Requires Node.js 22.12 or later. Schematics are drawn in [KiCad](https://www.kicad.org/) 10 or
+later, which is only needed to edit them.
 
 ```sh
 npm install
@@ -29,6 +30,7 @@ npm run build        # static site in dist/
 npm run preview      # serve dist/
 npm run size-check   # performance budget, after a build
 npm run spice-check  # simulate every netlist in ngspice (needs ngspice on PATH, or NGSPICE=/path)
+npm run schematic-check  # KiCad ERC on every schematic (needs kicad-cli; skipped without it)
 ```
 
 The site is plain TypeScript and DOM with no UI framework. Pages are pre-rendered HTML files

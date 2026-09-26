@@ -1,6 +1,6 @@
 // Render any PlotSpec to SVG markup, plus a data-table fallback for screen readers.
 
-import { esc } from '../schematic/draw';
+import { esc } from '../schematic/markup';
 import { formatNum, formatSI } from '../lib/units';
 import { sampleIndices } from './axes';
 import { renderBode } from './bode';

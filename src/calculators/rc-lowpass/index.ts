@@ -2,8 +2,8 @@ import { c, type Complex } from '../../lib/complex';
 import { deg, evaluate, logspace, linspace, sweepAround, toDb } from '../../lib/freq';
 import { Netlist, pulse, spiceValue } from '../../lib/spice';
 import { formatSI } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import { capacitor, ground, resistor, terminal, vpulse } from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
+import sheet from './schematic.kicad_sch';
 import { defineCalculator, ok, part, qty, type GuideItem, type ValuesOf } from '../types';
 
 const vars = {
@@ -88,24 +88,12 @@ export default defineCalculator<typeof vars, Out>({
       group: 'At the evaluation frequency',
     },
   ],
-  schematic: (v) => {
-    const s = new Sheet(
-      25,
-      12,
-      'RC low-pass filter schematic',
-      `Source V1 drives R1 (${formatSI(v.R, 'Ω')}) in series; C1 (${formatSI(v.C, 'F')}) goes from the output to ground.`,
-    );
-    const src = s.place(vpulse, 4, 3, { ref: 'V1', value: 'V_in' });
-    const r = s.place(resistor, 8, 3, { ref: 'R1', value: formatSI(v.R, 'Ω') });
-    const cap = s.place(capacitor, 16, 3, { rot: 90, ref: 'C1', value: formatSI(v.C, 'F') });
-    s.place(terminal, 21, 3, { ref: 'V_out', side: 'above' });
-    s.wire(src.pin('p'), r.pin('a'));
-    s.wire(r.pin('b'), cap.pin('a'), [21, 3]);
-    s.dot(cap.pin('a'));
-    s.wire(src.pin('n'), [4, 9], [16, 9], cap.pin('b'));
-    s.place(ground, 10, 9);
-    return s.render();
-  },
+  schematic: (v) =>
+    kicad(sheet, {
+      title: 'RC low-pass filter schematic',
+      desc: `Source V1 drives R1 (${formatSI(v.R, 'Ω')}) in series; C1 (${formatSI(v.C, 'F')}) goes from the output to ground.`,
+      vars: { R: formatSI(v.R, 'Ω'), C: formatSI(v.C, 'F') },
+    }),
   plots: (v, o) => {
     // Two decades either side of f_c, widened to include the evaluation frequency (up to 3 decades away).
     const fEval = Math.min(Math.max(v.f, o.fc / 1000), o.fc * 1000);

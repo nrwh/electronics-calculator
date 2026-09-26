@@ -3,8 +3,11 @@
 import { type Implicant, formatSop, literalCount } from '../../lib/logic';
 import { Netlist, pulse, spiceValue } from '../../lib/spice';
 import { formatNum, formatSI } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import { dff, terminal } from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
+import sheet1 from './schematic-1ff.kicad_sch';
+import sheet2 from './schematic-2ff.kicad_sch';
+import sheet3 from './schematic-3ff.kicad_sch';
+import sheet4 from './schematic-4ff.kicad_sch';
 import {
   type GuideItem,
   type ValuesOf,
@@ -169,6 +172,9 @@ export function equationText(d: CounterDesign, bit: number): string {
 export function tcText(k: number): string {
   return `TC = ${Array.from({ length: k }, (_, i) => `Q̅${k - 1 - i}`).join('·')}`;
 }
+
+/** One schematic per number of flip-flops (N = 2…16 needs 1 to 4). */
+const SHEETS = [sheet1, sheet2, sheet3, sheet4];
 
 const binary = (s: number, k: number): string => s.toString(2).padStart(k, '0');
 
@@ -359,37 +365,12 @@ export default defineCalculator<typeof vars, Out>({
   },
   schematic: (v, o) => {
     const d = o.design;
-    const pitch = 7;
-    const x = 25;
-    const s = new Sheet(
-      38,
-      d.k * pitch + 4,
-      'Down counter schematic',
-      `${d.k} D flip-flops share the clock. Each D input is driven by its next-state equation: ${d.equations.map((_, i) => equationText(d, i)).join('; ')}.`,
-    );
-    const top = 2;
-    const clkRows: number[] = [];
-    for (let i = 0; i < d.k; i++) {
-      const y0 = top + i * pitch;
-      const ff = s.place(dff, x, y0, { ref: `FF${i}`, labelAt: [x + 3, y0 - 0.5], labelAnchor: 'middle' });
-      // The D wire crosses the clock bus (no junction); the equation ends before the bus.
-      const [dx, dy] = ff.pin('d');
-      s.wire([x - 4, dy], [dx, dy]);
-      s.text([x - 4, dy], equationText(d, i), { anchor: 'end', dx: -4, dy: 4, cls: 'sch-eq' });
-      const clk = ff.pin('clk');
-      clkRows.push(clk[1]);
-      s.wire([x - 2, clk[1]], clk);
-      s.wire(ff.pin('q'), [x + 9, ff.pin('q')[1]]);
-      s.text([x + 9, ff.pin('q')[1]], `Q${i}`, { dx: 4, dy: 4 });
-      s.wire(ff.pin('qn'), [x + 8, ff.pin('qn')[1]]);
-      s.text([x + 8, ff.pin('qn')[1]], `Q̅${i}`, { dx: 4, dy: 4, cls: 'sch-ref' });
-    }
-    s.wire([x - 2, clkRows[0]!], [x - 2, clkRows[clkRows.length - 1]!]);
-    s.wire([2, clkRows[0]!], [x - 2, clkRows[0]!]);
-    for (const y of clkRows.slice(0, -1)) s.dot([x - 2, y]);
-    s.place(terminal, 2, clkRows[0]!, { ref: 'CLK', value: formatSI(v.fclk, 'Hz'), side: 'above' });
-    s.text([2, d.k * pitch + 1.5], `${tcText(d.k)}   (state 0, f_clk/${v.N})`, { cls: 'sch-eq' });
-    return s.render();
+    const eqs = Object.fromEntries(d.equations.map((_, i) => [`EQ${i}`, equationText(d, i)]));
+    return kicad(SHEETS[d.k - 1]!, {
+      title: 'Down counter schematic',
+      desc: `${d.k} D flip-flops share the clock. Each D input is driven by its next-state equation: ${d.equations.map((_, i) => equationText(d, i)).join('; ')}.`,
+      vars: { ...eqs, FCLK: formatSI(v.fclk, 'Hz'), TC: tcText(d.k), N: String(v.N) },
+    });
   },
   plots: (v, o) => {
     const d = o.design;

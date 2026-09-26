@@ -7,18 +7,9 @@ import { deg, logspace, toDb, unwrap } from '../../lib/freq';
 import { bisect } from '../../lib/solve';
 import { Netlist, pulse, spiceValue } from '../../lib/spice';
 import { formatNum, formatSI } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import {
-  capacitor,
-  ground,
-  inductor,
-  nmos,
-  resistor,
-  schottky,
-  switchNO,
-  terminal,
-  vdc,
-} from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
+import sheetAsync from './schematic-async.kicad_sch';
+import sheetSync from './schematic-sync.kicad_sch';
 import {
   type GuideItem,
   type Settings,
@@ -442,46 +433,20 @@ export default defineCalculator<typeof vars, Out>({
   ],
   schematic: (v, o) => {
     const sync = v.topology === 'sync';
-    const s = new Sheet(
-      37,
-      15,
-      'Buck converter schematic',
-      `V_in switches through Q1 to the switch node; ${sync ? 'Q2' : 'Schottky diode D1'} returns the inductor current when Q1 is off. L (${formatSI(v.L, 'H')}) and C_out (${formatSI(v.Cout, 'F')}) filter the output; R_top and R_bot feed back to the controller.`,
-    );
-    const src = s.place(vdc, 2, 4, {
-      ref: 'V_in',
-      value: `${formatSI(v.vinMin, 'V')}–${formatSI(v.vinMax, 'V')}`,
+    return kicad(sync ? sheetSync : sheetAsync, {
+      title: 'Buck converter schematic',
+      desc: `V_in switches through Q1 to the switch node; ${sync ? 'Q2' : 'Schottky diode D1'} returns the inductor current when Q1 is off. L (${formatSI(v.L, 'H')}) and C_out (${formatSI(v.Cout, 'F')}) filter the output; R_top and R_bot feed back to the controller.`,
+      vars: {
+        VIN: `${formatSI(v.vinMin, 'V')}–${formatSI(v.vinMax, 'V')}`,
+        L: formatSI(v.L, 'H'),
+        ...(sync ? {} : { VF: formatSI(v.vf, 'V') }),
+        COUT: formatSI(v.Cout, 'F'),
+        ESR: formatSI(v.esr, 'Ω'),
+        RLOAD: formatSI(v.vout / v.iout, 'Ω'),
+        RTOP: formatSI(o.rTop, 'Ω'),
+        RBOT: formatSI(o.rBot, 'Ω'),
+      },
     });
-    const q1 = s.place(switchNO, 8, 4, { ref: 'Q1' });
-    const l = s.place(inductor, 14, 4, { ref: 'L', value: formatSI(v.L, 'H') });
-    s.wire(src.pin('p'), q1.pin('a'));
-    s.wire(q1.pin('b'), l.pin('a'));
-    s.dot([13, 4]);
-    s.text([13, 4], 'SW', { anchor: 'middle', dy: -8 });
-    if (sync) {
-      const q2 = s.place(nmos, 11, 6, { ref: 'Q2', labelAt: [14, 6.4] });
-      s.wire(q2.pin('s'), [13, 12]);
-    } else {
-      const d1 = s.place(schottky, 13, 8, { rot: 270, ref: 'D1', value: formatSI(v.vf, 'V') });
-      s.wire(d1.pin('a'), [13, 12]);
-    }
-    const cout = s.place(capacitor, 21, 4, { rot: 90, ref: 'C_out', value: formatSI(v.Cout, 'F') });
-    s.text([21, 10], `ESR ${formatSI(v.esr, 'Ω')}`, { dx: 6, cls: 'sch-ref' });
-    const rl = s.place(resistor, 27, 4, { rot: 90, ref: 'Load', value: formatSI(v.vout / v.iout, 'Ω') });
-    const rt = s.place(resistor, 32, 4, { rot: 90, ref: 'R_top', value: formatSI(o.rTop, 'Ω') });
-    const rb = s.place(resistor, 32, 8, { rot: 90, ref: 'R_bot', value: formatSI(o.rBot, 'Ω') });
-    s.wire(l.pin('b'), [35, 4]);
-    s.dot([21, 4]).dot([27, 4]).dot([32, 4]);
-    s.place(terminal, 35, 4, { ref: 'V_out', side: 'above' });
-    s.wire(rt.pin('b'), rb.pin('a'));
-    s.wire([32, 8], [35, 8]).dot([32, 8]);
-    s.text([35, 8], 'FB', { dx: 4, dy: 4 });
-    s.wire(src.pin('n'), [2, 12], [32, 12], rb.pin('b'));
-    s.wire(cout.pin('b'), [21, 12]);
-    s.wire(rl.pin('b'), [27, 12]);
-    s.dot([13, 12]).dot([21, 12]).dot([27, 12]);
-    s.place(ground, 17, 12);
-    return s.render();
   },
   plots: (v, o) => {
     const T = 1 / v.fsw;

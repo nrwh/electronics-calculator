@@ -17,6 +17,7 @@ This copies `src/calculators/_template/`, a complete voltage-divider calculator,
 |---|---|
 | `meta.ts` | `{ id, title, category, summary, keywords }`. Loaded eagerly and at build time: the page `<title>`, meta description, home card and filter. Keep it free of imports other than types. Put common misspellings in `keywords`. |
 | `index.ts` | The `CalculatorDef` (default export). Loaded lazily as its own chunk (budget: 20 kB gzipped). |
+| `schematic.kicad_sch` | The schematic, drawn in KiCad (see [Drawing the schematic](#drawing-the-schematic-in-kicad)). Rendered at build time into a small SVG template. |
 | `derivation.md` | Markdown with TeX (`$…$`, `$$…$$`), rendered with KaTeX at build time into the Derivation tab. A TeX error fails the build. It is static text; live numbers belong in the results. |
 | `<id>.test.ts` | Hand-calculated reference values for each solve option. |
 | `spice-checks.ts` | ngspice measurements the netlist must match (run by `npm run spice-check` in CI). |
@@ -85,7 +86,7 @@ If `analyse` picks parts that aren't variables (the buck's feedback divider, the
 ### 5. Output
 
 - `results()` returns rows. Mark two or three with `headline: true` for the summary strip that stays in view while the page scrolls (and is announced to screen readers). Give a row `achieved: 'fc'` to show its target, error and spread.
-- `schematic()` returns `new Sheet(...)…render()`, drawn from `schematic/symbols.ts` with `place(symbol, x, y, { rot, ref, value })` and `wire(...points)`. Coordinates are on a 10-unit grid. Add IEC symbols to `symbols.ts` as needed.
+- `schematic()` returns `kicad(sheet, { title, desc, vars })`, where `sheet` is the imported `.kicad_sch` file and `vars` fills in its `${NAME}` text variables. See [Drawing the schematic in KiCad](#drawing-the-schematic-in-kicad).
 - `plots()` (optional) returns Bode, waveform or timing specs; the page draws them as SVG with a data-table fallback.
 - `guide()` returns component selection advice with `ok` / `warn` / `fail` / `info` status.
 - `spice()` returns a `Netlist`, or `unavailable(reason)`. Use only the subset that ngspice and LTspice both accept (see the About page). Use `spiceValue()` for numbers, which always writes `Meg` for 10⁶. The op-amp subcircuit is shared in `lib/opamp.ts`.
@@ -94,6 +95,64 @@ The default design (every variable at its `default`, first solve option) is rend
 page at build time: the fields, series settings and schematic. That avoids layout shift when
 the script loads. So `solve`, `analyse`, `results` and `schematic` must not touch the DOM or
 browser globals; they run in Node during the build.
+
+### Drawing the schematic in KiCad
+
+Schematics are drawn in [KiCad](https://www.kicad.org/) 10 or later (the files are in KiCad 10's
+format, which older versions won't open) and saved in the calculator's folder. KiCad is only
+needed to edit them: the site builds without it.
+
+1. Open `src/calculators/<id>/schematic.kicad_sch` in KiCad's Schematic Editor (File → Open;
+   no project is needed). `npm run new-calc` starts you with the template's voltage divider.
+2. Use any symbol from KiCad's libraries, or draw your own in the Symbol Editor. KiCad copies
+   the symbols it uses into the file, so it is self-contained. `src/schematic/ec.kicad_sym` has
+   a few symbols made for these schematics: an op-amp without supply pins (mirror it to put the
+   non-inverting input on top), an IEC D flip-flop, and an open terminal whose Value is its name.
+   Add it in Preferences → Manage Symbol Libraries to reuse them.
+3. Put **`${NAME}`** wherever the calculator fills in a value: a symbol's Value field
+   (`${R}`), or any text (`ESR ${ESR}`). KiCad shows the text as typed; the page replaces it:
+
+   ```ts
+   import sheet from './schematic.kicad_sch';
+
+   schematic: (v) =>
+     kicad(sheet, {
+       title: 'RC low-pass filter schematic',
+       desc: `R1 (${formatSI(v.R, 'Ω')}) in series, C1 (${formatSI(v.C, 'F')}) to ground.`,
+       vars: { R: formatSI(v.R, 'Ω'), C: formatSI(v.C, 'F') },
+     }),
+   ```
+
+   Every `${NAME}` must be given and every given name must be used, so a typo fails the tests.
+   Filled-in text is drawn in the accent colour; other text as labels. A `${FIELD}` that names
+   another field of the same symbol (such as `${SIM.PARAMS}`) is resolved from the file, as
+   KiCad does.
+4. KiCad text markup works: `V_{out}` (subscript), `x^{2}` (superscript), `~{Q}` (overbar).
+   Variable values use the same markup.
+5. Save. `npm run dev` reloads the page.
+
+What the site uses from the file: symbols (their graphics, pins and pin names), wires,
+junctions, no-connect flags, labels, text and graphic lines, and the position, angle and
+justification of every visible field and text. It ignores text sizes, colours, line widths,
+pin numbers, the paper and the title block: the page's own styles apply, so every schematic
+matches and follows the light and dark themes, and the drawing is cropped to its contents.
+Buses, hierarchical sheets, images and text boxes are not supported and fail the build with the
+file and line.
+
+**Variants.** When the circuit itself changes with a choice (the buck's MOSFET or diode, the
+down counter's number of flip-flops), draw one file per variant and pick it in `schematic()`:
+`kicad(v.topology === 'sync' ? sync : async, …)`. When only a label changes, use a variable.
+
+**Checks.** `npm run schematic-check` runs KiCad's ERC on every schematic (it needs
+`kicad-cli` on PATH, in the default install location, or in `KICAD_CLI`, and skips otherwise).
+It fails on drawing mistakes such as a dangling wire or an off-grid end, and counts pins and wire
+ends left open (add `-- --verbose` to list them); those are fine when a wire ends at a text
+label on purpose. `src/schematic/schematics.test.ts` renders every calculator's schematics
+and snapshots them, so a schematic change shows up in review: check the diff, then accept it
+with `npx vitest -u`.
+
+KiCad's symbol libraries are licensed CC-BY-SA 4.0 with an exception for designs that use
+them, which covers the symbols embedded in these schematics.
 
 ### 6. Tests and SPICE checks
 
@@ -127,6 +186,7 @@ Netlists and logs are written to `.spice-out/`.
 - [ ] `npm test`, `npm run lint` and `npm run typecheck` pass
 - [ ] `npm run spice-check -- <id>` passes
 - [ ] `npm run build && npm run size-check` pass
+- [ ] `npm run schematic-check` passes, if you have KiCad
 - [ ] Checked every solve option, switching between them, and every tab in `npm run dev`, at desktop and phone widths, in light and dark themes
 
 ## Code style

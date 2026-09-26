@@ -1,6 +1,6 @@
 // Scales, ticks and axis drawing shared by the SVG plots.
 
-import { esc } from '../schematic/draw';
+import { esc } from '../schematic/markup';
 import { formatNum, siParts } from '../lib/units';
 
 export const PLOT_W = 640;

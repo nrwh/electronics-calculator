@@ -1,6 +1,6 @@
 // Time-domain waveform plot: one or more stacked panels sharing a linear time axis.
 
-import { esc } from '../schematic/draw';
+import { esc } from '../schematic/markup';
 import type { WaveformPlot } from './types';
 import {
   MARGIN,

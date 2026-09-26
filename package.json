@@ -19,7 +19,8 @@
     "format": "prettier --write .",
     "spice-check": "tsx scripts/spice-check.ts",
     "new-calc": "tsx scripts/new-calc.ts",
-    "size-check": "tsx scripts/size-check.ts"
+    "size-check": "tsx scripts/size-check.ts",
+    "schematic-check": "tsx scripts/schematic-check.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

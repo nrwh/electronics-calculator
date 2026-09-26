@@ -44,6 +44,7 @@ console.log(`
 Next:
   1. Edit meta.ts: category, summary, keywords.
   2. Replace the example maths in index.ts (vars, solveFor, solve, analyse, results, schematic, plots, guide, spice).
+     Draw the circuit in schematic.kicad_sch with KiCad (see CONTRIBUTING.md).
   3. Write derivation.md and the reference values in ${id}.test.ts.
   4. Add ngspice measurements to spice-checks.ts.
   5. npm run dev, then open /calc/${id}/. npm test && npm run spice-check before opening a PR.`);

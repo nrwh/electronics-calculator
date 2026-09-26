@@ -2,7 +2,7 @@
 
 import type { SeriesChoice } from '../lib/eseries';
 import type { Netlist, Unavailable } from '../lib/spice';
-import type { SchematicDoc } from '../schematic/draw';
+import type { SchematicDoc } from '../schematic/kicad';
 import type { PlotSpec } from '../plot/types';
 
 export type PartType = 'R' | 'C' | 'L';

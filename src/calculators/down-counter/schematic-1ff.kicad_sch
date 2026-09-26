@@ -1,0 +1,545 @@
+(kicad_sch
+	(version 20251024)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "01765634-b858-49ff-a1ad-7a0275f83c4d")
+	(paper "A4")
+	(lib_symbols
+		(symbol "ec:DFF"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0.508)
+				)
+				(exclude_from_sim no)
+				(in_bom yes)
+				(on_board yes)
+				(in_pos_files yes)
+				(duplicate_pin_numbers_are_jumpers no)
+				(property "Reference" "FF"
+					(at 0 8.001 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Value" "DFF"
+					(at 0 -8.001 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Description" "D flip-flop, IEC 60617 style (1D, C1, Q, Q̅), rising-edge clock"
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(symbol "DFF_0_1"
+					(rectangle
+						(start -5.08 6.35)
+						(end 5.08 -6.35)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type background)
+						)
+					)
+				)
+				(symbol "DFF_1_1"
+					(pin input line
+						(at -7.62 3.81 0)
+						(length 2.54)
+						(name "1D"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "1"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin input clock
+						(at -7.62 -3.81 0)
+						(length 2.54)
+						(name "C1"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "2"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin output line
+						(at 7.62 3.81 180)
+						(length 2.54)
+						(name "Q"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "3"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+					(pin output line
+						(at 7.62 -3.81 180)
+						(length 2.54)
+						(name "~{Q}"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "4"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+		(symbol "ec:Terminal"
+				(pin_numbers
+					(hide yes)
+				)
+				(pin_names
+					(offset 0)
+					(hide yes)
+				)
+				(exclude_from_sim yes)
+				(in_bom no)
+				(on_board yes)
+				(in_pos_files no)
+				(duplicate_pin_numbers_are_jumpers no)
+				(property "Reference" "TP"
+					(at 0 2.54 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Value" "Terminal"
+					(at 0 2.54 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+						(justify bottom)
+					)
+				)
+				(property "Footprint" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Datasheet" ""
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(property "Description" "Open terminal (input, output or test point). Put the net's name in Value."
+					(at 0 0 0)
+					(show_name no)
+					(do_not_autoplace no)
+					(hide yes)
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(symbol "Terminal_0_1"
+					(circle
+						(center 0 0)
+						(radius 0.762)
+						(stroke
+							(width 0.254)
+							(type default)
+						)
+						(fill
+							(type background)
+						)
+					)
+				)
+				(symbol "Terminal_1_1"
+					(pin passive line
+						(at 0 0 0)
+						(length 0)
+						(name "~"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+						(number "1"
+							(effects
+								(font
+									(size 1.27 1.27)
+								)
+							)
+						)
+					)
+				)
+				(embedded_fonts no)
+			)
+	)
+	(symbol
+		(lib_id "ec:DFF")
+		(at 71.12 11.43 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "938ac1eb-909a-4572-91e9-1200f402aefe")
+		(property "Reference" "FF0"
+			(at 71.12 2.8321 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "DFF"
+			(at 71.12 11.43 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 71.12 11.43 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 71.12 11.43 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 71.12 11.43 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3effd22d-b458-4c52-b7d0-d179779cca0e")
+		)
+		(pin "2"
+			(uuid "50451d1b-a06e-48f7-bad0-fdcae7449cda")
+		)
+		(pin "3"
+			(uuid "8e592c19-1194-4c45-a94e-4ecef5dc1bfb")
+		)
+		(pin "4"
+			(uuid "4f491dfa-40f8-4e01-ab15-58be5d778990")
+		)
+		(instances
+			(project "schematic-1ff"
+				(path "/01765634-b858-49ff-a1ad-7a0275f83c4d"
+					(reference "FF0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "ec:Terminal")
+		(at 5.08 15.24 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2a34ad70-5350-4279-9b35-3dafd45bd75c")
+		(property "Reference" "TP1"
+			(at 5.08 15.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "CLK"
+			(at 5.08 8.6741 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 5.08 15.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 5.08 15.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 5.08 15.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a1c6fd56-1c96-4ad8-9e65-6091c6f17a09")
+		)
+		(instances
+			(project "schematic-1ff"
+				(path "/01765634-b858-49ff-a1ad-7a0275f83c4d"
+					(reference "TP1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 53.34 7.62)
+			(xy 63.5 7.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6e3893d9-18d9-40de-922c-50a4d2462aca")
+	)
+	(wire
+		(pts
+			(xy 58.42 15.24)
+			(xy 63.5 15.24)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c37d565c-60b0-438d-8a34-8cabd5d7d08f")
+	)
+	(wire
+		(pts
+			(xy 78.74 7.62)
+			(xy 86.36 7.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b9126d0f-bee1-47aa-ac05-7d7202b0999e")
+	)
+	(wire
+		(pts
+			(xy 78.74 15.24)
+			(xy 83.82 15.24)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e158be77-fcf0-4add-92fe-9d65493c90e1")
+	)
+	(wire
+		(pts
+			(xy 5.08 15.24)
+			(xy 58.42 15.24)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8a3e69ee-7699-406d-b2dd-f52ac913792a")
+	)
+	(text "${EQ0}"
+		(exclude_from_sim no)
+		(at 52.324 7.5692 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "8388c46f-2787-45da-981a-b841aefcc747")
+	)
+	(text "Q0"
+		(exclude_from_sim no)
+		(at 87.376 7.6581 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "69900b02-0cd3-4594-90e2-3179b30b4785")
+	)
+	(text "Q̅0"
+		(exclude_from_sim no)
+		(at 84.836 15.2781 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "91530005-c943-4fe0-99e9-e9fd34e8c014")
+	)
+	(text "${TC}   (state 0, f_{clk}/${N})"
+		(exclude_from_sim no)
+		(at 5.08 20.5232 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "90cf88c3-a6e5-49ba-934c-2e0fca8cc752")
+	)
+	(text "${FCLK}"
+		(exclude_from_sim no)
+		(at 5.08 11.8872 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "1a8935f5-acbe-4207-aeaa-4c918dc03dd3")
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

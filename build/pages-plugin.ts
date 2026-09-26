@@ -7,6 +7,7 @@ import { normalizePath, runnerImport, type Plugin } from 'vite';
 import type { AnyCalculatorDef, CalculatorMeta } from '../src/calculators/types';
 import type { TopPanel } from '../src/ui/markup';
 import { renderDerivation } from './derivation-plugin';
+import { kicadPlugin } from './kicad-plugin';
 import { renderAbout, renderCalculator, renderHome, renderNotFound, type SiteContext } from './site';
 
 type PageKey = { kind: 'home' } | { kind: 'about' } | { kind: 'notFound' } | { kind: 'calc'; id: string };
@@ -39,7 +40,7 @@ export async function loadMeta(root: string, id: string): Promise<CalculatorMeta
 
 /** Render a calculator's default design (top panel) for its pre-rendered page. */
 export async function prerenderCalculator(root: string, id: string): Promise<TopPanel> {
-  const opts = { configFile: false as const, root, logLevel: 'silent' as const };
+  const opts = { configFile: false as const, root, logLevel: 'silent' as const, plugins: [kicadPlugin()] };
   const [{ module: calc }, { module: pre }] = await Promise.all([
     runnerImport<{ default: AnyCalculatorDef }>(path.join(root, CALC_DIR, id, 'index.ts'), opts),
     runnerImport<{ prerender: (def: AnyCalculatorDef) => TopPanel }>(

@@ -8,8 +8,9 @@ import { DEFAULT_A0, OPAMP_SUBCKT, type OpAmp, openLoop, opampSubckt } from '../
 import { bisect } from '../../lib/solve';
 import { Netlist, spiceValue, unavailable } from '../../lib/spice';
 import { formatSI, formatSlew } from '../../lib/units';
-import { Sheet } from '../../schematic/draw';
-import { capacitor, diode, ground, opampFlip, resistor, terminal } from '../../schematic/symbols';
+import { kicad } from '../../schematic/kicad';
+import sheetDiodes from './schematic-diodes.kicad_sch';
+import sheetSingle from './schematic-single.kicad_sch';
 import {
   type GuideItem,
   type Settings,
@@ -351,61 +352,20 @@ export default defineCalculator<typeof vars, Out>({
   ],
   schematic: (v, o) => {
     const diodes = v.method === 'diodes';
-    const s = new Sheet(
-      31,
-      21,
-      'Wien bridge oscillator schematic',
-      `A series R–C (${formatSI(v.R, 'Ω')}, ${formatSI(v.C, 'F')}) from the output and a parallel R–C to ground feed the non-inverting input. ${diodes ? 'Rf1 and Rf2, with anti-parallel diodes across Rf2,' : 'Rf'} and Rg set the gain.`,
-    );
-    const u = s.place(opampFlip, 16, 8, { ref: 'U1', labelAt: [19.2, 5.3] });
-    // Parallel arm to ground.
-    const rp = s.place(resistor, 5, 7, { rot: 90, ref: 'R2', value: formatSI(v.R, 'Ω'), side: 'left' });
-    const cp = s.place(capacitor, 9, 7, { rot: 90, ref: 'C2', value: formatSI(v.C, 'F') });
-    s.wire(rp.pin('a'), [12, 7], u.pin('in1'));
-    s.wire(rp.pin('b'), cp.pin('b'));
-    s.dot([9, 7]).dot([12, 7]);
-    s.place(ground, 7, 11);
-    // Series arm from the output.
-    const cs = s.place(capacitor, 13, 3, { ref: 'C1', value: formatSI(v.C, 'F'), inline: true });
-    const rs = s.place(resistor, 18, 3, { ref: 'R1', value: formatSI(v.R, 'Ω'), inline: true });
-    s.wire([12, 7], [12, 3], cs.pin('a'));
-    s.wire(cs.pin('b'), rs.pin('a'));
-    s.wire(rs.pin('b'), [25, 3], [25, 8]);
-    s.wire(u.pin('out'), [29, 8]);
-    s.dot([25, 8]);
-    s.place(terminal, 29, 8, { ref: 'V_out', side: 'above' });
-    // Gain network.
-    s.wire(u.pin('in2'), [15, 9], [15, 14]);
-    const rg = s.place(resistor, 15, 14, {
-      rot: 90,
-      ref: v.method === 'lamp' ? 'Lamp' : 'R_g',
-      value: formatSI(v.Rg, 'Ω'),
-      side: 'left',
+    const rg = formatSI(v.Rg, 'Ω');
+    const rf = formatSI(o.rf, 'Ω');
+    return kicad(diodes ? sheetDiodes : sheetSingle, {
+      title: 'Wien bridge oscillator schematic',
+      desc: `A series R–C (${formatSI(v.R, 'Ω')}, ${formatSI(v.C, 'F')}) from the output and a parallel R–C to ground feed the non-inverting input. ${diodes ? 'Rf1 and Rf2, with anti-parallel diodes across Rf2,' : 'Rf'} and Rg set the gain.`,
+      vars: {
+        R: formatSI(v.R, 'Ω'),
+        C: formatSI(v.C, 'F'),
+        RG: v.method === 'lamp' ? `${rg} lamp` : v.method === 'jfet' ? `${rg} (JFET AGC)` : rg,
+        ...(diodes
+          ? { RF1: formatSI(o.rf1, 'Ω'), RF2: formatSI(o.rf2, 'Ω') }
+          : { RF: v.method === 'ntc' ? `${rf} NTC` : rf }),
+      },
     });
-    s.place(ground, rg.pin('b')[0], rg.pin('b')[1]);
-    s.dot([15, 14]);
-    if (diodes) {
-      const rf1 = s.place(resistor, 16, 14, { ref: 'R_f1', value: formatSI(o.rf1, 'Ω') });
-      const rf2 = s.place(resistor, 21, 14, { ref: 'R_f2', value: formatSI(o.rf2, 'Ω') });
-      const d1 = s.place(diode, 21, 16);
-      const d2 = s.place(diode, 25, 18, { rot: 180, ref: 'D1, D2', side: 'below' });
-      s.wire([15, 14], rf1.pin('a'));
-      s.wire(rf1.pin('b'), rf2.pin('a'));
-      s.wire(rf2.pin('b'), [25, 14]);
-      s.wire([20, 14], [20, 18], d2.pin('k'));
-      s.wire([20, 16], d1.pin('a'));
-      s.wire(d1.pin('k'), [25, 16]);
-      s.wire(d2.pin('a'), [25, 18], [25, 8]);
-      s.dot([20, 14]).dot([20, 16]).dot([25, 14]).dot([25, 16]);
-    } else {
-      const rf = s.place(resistor, 18, 14, {
-        ref: v.method === 'ntc' ? 'NTC' : v.method === 'jfet' ? 'R_f (JFET AGC on R_g)' : 'R_f',
-        value: formatSI(o.rf, 'Ω'),
-      });
-      s.wire([15, 14], rf.pin('a'));
-      s.wire(rf.pin('b'), [25, 14], [25, 8]);
-    }
-    return s.render();
   },
   plots: (v, o) => {
     const op = opOf(v);

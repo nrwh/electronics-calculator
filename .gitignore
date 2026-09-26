@@ -4,3 +4,10 @@ coverage
 .spice-out
 *.log
 .DS_Store
+# KiCad
+*-backups/
+*.kicad_prl
+_autosave-*
+*.lck
+fp-info-cache
+\#auto_saved_files\#

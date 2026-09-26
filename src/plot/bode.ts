@@ -1,6 +1,6 @@
 // Bode plot: magnitude (dB) and optional phase (degrees) over a log frequency axis.
 
-import { esc } from '../schematic/draw';
+import { esc } from '../schematic/markup';
 import type { BodePlot } from './types';
 import {
   MARGIN,

@@ -1,6 +1,6 @@
 // Digital timing diagram: a clock row and one row per signal, one step per clock period.
 
-import { esc } from '../schematic/draw';
+import { esc } from '../schematic/markup';
 import type { TimingPlot } from './types';
 import { PLOT_W, siTick, svgOpen } from './axes';
 
